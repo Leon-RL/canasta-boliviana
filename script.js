@@ -1,3 +1,27 @@
+import { getAuth } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+
+// Autenticación y base de datos
+const auth = getAuth();
+const db = getFirestore();
+
+const user = auth.currentUser; // usuario actualmente autenticado
+
+if (user) {
+  await addDoc(collection(db, "precios"), {
+    ciudad: "Cochabamba",
+    producto: "Zanahoria",
+    precio: 2,
+    fecha: new Date().toISOString(),
+    equivalencia: "lb",
+    uid: user.uid  // 🔒 necesario para que coincida con las reglas
+  });
+} else {
+  alert("Debes iniciar sesión para registrar precios.");
+}
+
+
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
