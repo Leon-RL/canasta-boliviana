@@ -1,3 +1,21 @@
+import { GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+
+const provider = new GoogleAuthProvider();
+
+document.getElementById('btn-login').addEventListener('click', async () => {
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+    mostrarToast(`Bienvenido ${user.displayName}`, '#27ae60');
+  } catch (error) {
+    console.error("Error al iniciar sesión:", error);
+    mostrarToast('Error al iniciar sesión.', '#e74c3c');
+  }
+});
+
+
+
+
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
