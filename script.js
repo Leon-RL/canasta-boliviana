@@ -16,10 +16,7 @@ document.getElementById('btn-login').addEventListener('click', async () => {
     mostrarToast('Error al iniciar sesión.', '#e74c3c');
   }
 });
-if (!auth.currentUser) {
-  mostrarToast('Primero inicia sesión.', '#e74c3c');
-  return;
-}
+
 await guardarRegistroSemanal({
   producto, precio, equivalencia, ciudad,
   fecha: new Date().toISOString(),
