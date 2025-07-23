@@ -1,6 +1,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 import { GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+const auth = getAuth(app);  // IMPORTANTE
+
 
 const provider = new GoogleAuthProvider();
 
@@ -14,6 +17,20 @@ document.getElementById('btn-login').addEventListener('click', async () => {
     mostrarToast('Error al iniciar sesión.', '#e74c3c');
   }
 });
+if (!auth.currentUser) {
+  mostrarToast('Primero inicia sesión.', '#e74c3c');
+  return;
+}
+
+await guardarRegistroSemanal({
+  producto, precio, equivalencia, ciudad,
+  fecha: new Date().toISOString(),
+  claveSemana,
+  uid: auth.currentUser.uid
+});
+
+
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyCbE78-0DMWVEuf7rae3uyI-FqhDTPL3J8",
