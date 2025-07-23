@@ -1,5 +1,19 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+import { GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+
+const provider = new GoogleAuthProvider();
+
+document.getElementById('btn-login').addEventListener('click', async () => {
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+    mostrarToast(`Bienvenido ${user.displayName}`, '#27ae60');
+  } catch (error) {
+    console.error("Error al iniciar sesión:", error);
+    mostrarToast('Error al iniciar sesión.', '#e74c3c');
+  }
+});
 
 const firebaseConfig = {
   apiKey: "AIzaSyCbE78-0DMWVEuf7rae3uyI-FqhDTPL3J8",
