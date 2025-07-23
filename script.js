@@ -104,30 +104,15 @@ function formatearFecha(fecha) {
   return fecha.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
-import { getAuth } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
-const auth = getAuth();
-
 async function guardarRegistroSemanal(registro) {
-  const user = auth.currentUser;
-  if (!user) {
-    alert("Debes iniciar sesión para registrar precios.");
-    return;
-  }
-
-  const registroConUid = {
-    ...registro,
-    uid: user.uid  // 👈 obligatorio para que las reglas de Firestore lo acepten
-  };
-
   try {
-    await addDoc(collection(db, "registros"), registroConUid);
-    console.log("Guardado en Firestore:", registroConUid);
+    await addDoc(collection(db, "registros"), registro);
+    console.log("Guardado en Firestore:", registro);
   } catch (e) {
     console.error("Error al guardar en Firestore: ", e);
     throw e;
   }
 }
-
 
 async function obtenerDatosSemana(claveSemana) {
   const datos = [];
