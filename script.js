@@ -17,13 +17,6 @@ document.getElementById('btn-login').addEventListener('click', async () => {
   }
 });
 
-await guardarRegistroSemanal({
-  producto, precio, equivalencia, ciudad,
-  fecha: new Date().toISOString(),
-  claveSemana,
-  uid: auth.currentUser.uid
-});
-
 
 
 
