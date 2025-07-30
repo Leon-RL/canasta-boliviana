@@ -19,7 +19,7 @@
      crossorigin="anonymous"></script>
 </head>
 <body>
-  <header class="topbar">
+    <header class="topbar">
     <div class="menu-toggle" id="menu-toggle">☰</div>
     <p class="topbar-title">Canasta Boliviana</p>
   </header>
@@ -30,32 +30,35 @@
       <ul>
         <li onclick="mostrarSeccion('registro')">Registrar Precio</li>
         <li onclick="mostrarSeccion('estadisticas')">Estadísticas</li>
+        <li onclick="mostrarSeccion('informacion')">Informacion de la web</li>
       </ul>
     </nav>
   </aside>
+<div class="overlay-siderbar" id="overlay"></div>
 
   <main class="content">
     <section id="registro" class="card">
-      <h3>Registrar Precio</h3>
-      <select id="Producto">
-        <option value="" disabled selected>Selecciona El Producto</option>
-        <option value="Arroz">Arroz</option>
-        <option value="Fideo">Fideo</option>
-        <option value="Harina">Harina</option>
-        <option value="Leche en polvo">Leche en polvo</option>
-        <option value="Carne de res">Carne de res</option>
-        <option value="Carne de pollo">Carne de pollo</option>
-        <option value="Papa">Papa</option>
-        <option value="Cebolla">Cebolla</option>
-        <option value="Zanahoria">Zanahoria</option>
-        <option value="Tomate">Tomate</option>
-        <option value="Huevo">Huevo</option>
-        <option value="Pescado">Pescado</option>
-        <option value="Aceite">Aceite</option>
-        <option value="Lenteja">Lenteja</option>
-        <option value="Ajo">Ajo</option>
-        <option value="Pan">Pan</option>
-      </select>
+      <h3>Registro de Precios</h3>
+      <p style="color:rgba(0, 0, 0, 0.534);font-size: 18px;font-weight: bold;text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.411);">BIENVENIDO A CANASTA BOLIVIANA</p>
+      <p style="font-family: calibri;font-size: 18px;color:rgba(0, 0, 0, 0.527);">aqui puedes ver información sobre los precios de cualquier producto,
+        asi tambien puedes ayudar registrando a que otros usuarios vean.
+      </p>
+    <label for="producto">Selecciona categoría o producto</label>
+  <select id="Producto" size="10" style="width:300px;height: 100px;">
+  
+  
+  <option class="group-title" value="Verduras">🥬 Verduras</option>
+  <option class="group-title" value="Proteínas">🥩 Proteínas</option>
+  <option class="group-title" value="Granos">🌾 Granos</option>
+  <option class="group-title" value="Preparaciones">🍞 Preparaciones</option>
+  <option class="group-title" value="Frutas">🍇 Frutas</option>
+  <option class="group-title" value="Lácteos">🥛 Lácteos</option>
+
+  <option class="group-title" value="BasicosCocina">🍳 BasicosCocina</option>
+  <option class="group-title" value="Bebidas">🫗 Bebidas</option>
+  <option class="group-title" value="Aseopersonal">🪥 Aseo personal</option>
+</select>
+
       <div class="form-group">
         <label>Precio (Bs)</label>
         <input type="number" id="precio" placeholder="Ej. 8.50" />
@@ -63,13 +66,13 @@
       <div class="form-group">
         <label>Unidad</label>
         <select id="equivalencia">
-          <option value="" disabled selected>Selecciona la Unidad</option>
+          <option disabled selected>Selecciona la Unidad</option>
         </select>
       </div>
       <div class="form-group">
         <label>Ciudad</label>
         <select id="ciudad">
-          <option value="" disabled selected>Selecciona Ciudad</option>
+          <option disabled selected>Selecciona Ciudad</option>
           <option>La Paz</option>
           <option>Cochabamba</option>
           <option>Santa Cruz</option>
@@ -81,8 +84,6 @@
           <option>Pando</option>
         </select>
       </div>
-      <button id="btn-login">Iniciar sesión con Google</button>
-
       <button id="btn-reportar">Registrar Precio</button>
       <div id="toast" class="toast hidden"></div>
 
@@ -111,7 +112,7 @@
         </tbody>
       </table>
 
-      <div id="detalle-estadisticas" class="card hidden" style="margin-top: 20px;">
+      <div id="detalle-estadisticas" class="card hidden" style="margin-top: 20px; ">
         <h4>Detalle del Producto</h4>
         <p id="detalle-contenido">Selecciona un producto para ver sus detalles.</p>
       </div>
@@ -122,8 +123,58 @@
         <button id="btn-semana-siguiente" disabled>Semana siguiente →</button>
       </div>
     </section>
+
+    <section id="informacion" class="card hidden">
+      <h3>Informacion de la web</h3>
+      <p>🧺 Canasta Boliviana – Información de precios de alimentos en Bolivia.</p>
+
+<p>Canasta Boliviana es una plataforma colaborativa donde los ciudadanos pueden registrar y consultar precios de productos alimenticios en distintas ciudades del país. Su objetivo es ofrecer transparencia, comparación y control ciudadano sobre los precios reales que se pagan en los mercados.</p>
+
+<p>🔍 ¿Qué puedes hacer en esta web?</p>
+
+<p>📌 Ver precios reales de productos como arroz, papa, leche, tomate y muchos más.</p>
+
+<p>📈 Consultar estadísticas como precio máximo, mínimo y promedio por producto.</p>
+
+<p>🏙️ Comparar precios por ciudad, semana, día o mes.</p>
+
+<p>🧑‍🌾 Registrar tú mismo el precio que pagaste en el mercado, para ayudar a otros.</p>
+
+<p>📊 Ver datos organizados por unidades de medida (kilo, litro, etc.).</p>
+
+<p>📍 Saber en qué departamentos se encontraron precios iguales o similares.</p>
+
+<p>💡 La información es pública y se actualiza en tiempo real gracias a los aportes de los propios usuarios. Cuantos más datos haya, más útil será para todos.</p>
+
+<p>✅ Ideal para: consumidores, investigadores, periodistas, estudiantes, autoridades y cualquier persona interesada en la canasta familiar boliviana.</p>
+<p class="text-center text-gray-700 font-medium">
+  Aporta datos reales de precios para ayudar a otras personas en tu comunidad.
+</p>
+
+    </section>
+
+
+    
   </main>
 
-  <script type="module" src="script.js"></script>
+  <script type="module" src="scriptt.js"></script>
+
+
+ 
+<!--
+  <button id="btn-mostrar-qr">Contacto</button>
+
+  
+
+  <!-- Modal -->
+ <!-- <div id="modal-fondo">
+    <div id="modal-contenido">
+      <button id="cerrar-modal">&times;</button>
+      <h2>Escanea este QR para pagar</h2>
+      <img src="ruta-de-tu-qr.png" alt="Código QR Banco FIE" />
+    </div>
+  </div> -->
+
 </body>
 </html>
+
