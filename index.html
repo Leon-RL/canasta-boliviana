@@ -45,19 +45,17 @@
       </p>
     <label for="producto">Selecciona categoría o producto</label>
   <select id="Producto" size="10" style="width:300px;height: 100px;">
-  
-  
-  <option class="group-title" value="Verduras">🥬 Verduras</option>
-  <option class="group-title" value="Proteínas">🥩 Proteínas</option>
-  <option class="group-title" value="Granos">🌾 Granos</option>
-  <option class="group-title" value="Preparaciones">🍞 Preparaciones</option>
-  <option class="group-title" value="Frutas">🍇 Frutas</option>
-  <option class="group-title" value="Lácteos">🥛 Lácteos</option>
-
-  <option class="group-title" value="BasicosCocina">🍳 BasicosCocina</option>
-  <option class="group-title" value="Bebidas">🫗 Bebidas</option>
-  <option class="group-title" value="Aseopersonal">🪥 Aseo personal</option>
+  <optgroup label="🥬 Verduras">
+    <option value="Lechuga">Lechuga</option>
+    <option value="Zanahoria">Zanahoria</option>
+  </optgroup>
+  <optgroup label="🥩 Proteínas">
+    <option value="Carne de res">Carne de res</option>
+    <option value="Pollo">Pollo</option>
+  </optgroup>
+  <!-- ... y así sucesivamente -->
 </select>
+
 
       <div class="form-group">
         <label>Precio (Bs)</label>
