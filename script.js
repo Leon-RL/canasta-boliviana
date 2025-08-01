@@ -11,6 +11,59 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+import {
+  getFirestore, collection, addDoc, getDocs, query, where
+} from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+const db = getFirestore(app);
+document.getElementById('btn-reportar').addEventListener('click', async () => {
+  const producto = document.getElementById('Producto').value;
+  const precio = parseFloat(document.getElementById('precio').value);
+  const equivalencia = document.getElementById('equivalencia').value;
+  const ciudad = document.getElementById('ciudad').value;
+  const fecha = new Date();
+
+  if (!producto || isNaN(precio) || !equivalencia || !ciudad) {
+    alert('Completa todos los campos.');
+    return;
+  }
+
+  try {
+    await addDoc(collection(db, 'precios'), {
+      producto, precio, equivalencia, ciudad, fecha: fecha.toISOString()
+    });
+
+    document.getElementById('toast').textContent = "Registro guardado.";
+    document.getElementById('toast').classList.remove('hidden');
+    setTimeout(() => {
+      document.getElementById('toast').classList.add('hidden');
+    }, 3000);
+    
+    cargarDatosDesdeFirestore(); // actualizar la tabla
+  } catch (e) {
+    console.error("Error al guardar en Firestore: ", e);
+  }
+});
+async function cargarDatosDesdeFirestore() {
+  const snapshot = await getDocs(collection(db, 'precios'));
+  const datos = [];
+
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    datos.push({
+      producto: data.producto,
+      precio: data.precio,
+      equivalencia: data.equivalencia,
+      ciudad: data.ciudad,
+      fecha: new Date(data.fecha)
+    });
+  });
+
+  mostrarDatos(datos);         // Para llenar la tabla de precios
+  mostrarEstadisticas(datos); // Para llenar estadísticas
+}
+window.addEventListener('load', () => {
+  cargarDatosDesdeFirestore();
+});
 
 // Función para cargar unidades según producto
 export function CargarUnidades() {
@@ -472,6 +525,7 @@ function eliminarProductosDe(categoria) {
   }
   productosInsertados[categoria] = false;
 }
+
 
 
 
