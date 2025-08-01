@@ -43,6 +43,8 @@ document.getElementById('btn-reportar').addEventListener('click', async () => {
     console.error("Error al guardar en Firestore: ", e);
   }
 });
+let datosGlobales = []; // almacena los datos traídos de Firebase
+
 async function cargarDatosDesdeFirestore() {
   const snapshot = await getDocs(collection(db, 'precios'));
   const datos = [];
@@ -51,16 +53,22 @@ async function cargarDatosDesdeFirestore() {
     const data = doc.data();
     datos.push({
       producto: data.producto,
-      precio: data.precio,
+      precio: parseFloat(data.precio),
       equivalencia: data.equivalencia,
       ciudad: data.ciudad,
       fecha: new Date(data.fecha)
     });
   });
 
-  mostrarDatos(datos);         // Para llenar la tabla de precios
-  mostrarEstadisticas(datos); // Para llenar estadísticas
+  datosGlobales = datos;
+  const claveSemana = obtenerClaveSemana(new Date());
+  const datosSemana = datos.filter(d => obtenerClaveSemana(d.fecha) === claveSemana);
+
+  mostrarDatos(datosSemana);
+  mostrarEstadisticas(datosSemana);
+  mostrarTituloSemana(claveSemana);
 }
+
 window.addEventListener('load', () => {
   cargarDatosDesdeFirestore();
 });
@@ -525,6 +533,7 @@ function eliminarProductosDe(categoria) {
   }
   productosInsertados[categoria] = false;
 }
+
 
 
 
