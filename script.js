@@ -11,69 +11,7 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-import {
-  getFirestore, collection, addDoc, getDocs, query, where
-} from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
-const db = getFirestore(app);
-document.getElementById('btn-reportar').addEventListener('click', async () => {
-  const producto = document.getElementById('Producto').value;
-  const precio = parseFloat(document.getElementById('precio').value);
-  const equivalencia = document.getElementById('equivalencia').value;
-  const ciudad = document.getElementById('ciudad').value;
-  const fecha = new Date();
 
-  if (!producto || isNaN(precio) || !equivalencia || !ciudad) {
-    alert('Completa todos los campos.');
-    return;
-  }
-
-  try {
-    await addDoc(collection(db, 'precios'), {
-      producto, precio, equivalencia, ciudad, fecha: fecha.toISOString()
-    });
-
-    document.getElementById('toast').textContent = "Registro guardado.";
-    document.getElementById('toast').classList.remove('hidden');
-    setTimeout(() => {
-      document.getElementById('toast').classList.add('hidden');
-    }, 3000);
-    
-    cargarDatosDesdeFirestore(); // actualizar la tabla
-  } catch (e) {
-    console.error("Error al guardar en Firestore: ", e);
-  }
-});
-let datosGlobales = []; // almacena los datos traídos de Firebase
-
-async function cargarDatosDesdeFirestore() {
-  const snapshot = await getDocs(collection(db, 'precios'));
-  const datos = [];
-
-  snapshot.forEach(doc => {
-    const data = doc.data();
-    datos.push({
-      producto: data.producto,
-      precio: parseFloat(data.precio),
-      equivalencia: data.equivalencia,
-      ciudad: data.ciudad,
-      fecha: new Date(data.fecha)
-    });
-  });
-
-  datosGlobales = datos;
-
-  const claveSemana = obtenerClaveSemana(new Date());
-  const datosSemana = datos.filter(d => obtenerClaveSemana(d.fecha) === claveSemana);
-
-  mostrarTituloSemana(claveSemana);
-  mostrarDatos(datosSemana);
-  mostrarEstadisticas(datosSemana);
-}
-
-
-window.addEventListener('load', () => {
-  cargarDatosDesdeFirestore();
-});
 
 // Función para cargar unidades según producto
 export function CargarUnidades() {
@@ -143,12 +81,13 @@ export function CargarUnidades() {
 
 
 function obtenerClaveSemana(fecha) {
-  const primerDiaDelAño = new Date(fecha.getFullYear(), 0, 1);
-  const dias = Math.floor((fecha - primerDiaDelAño) / (24 * 60 * 60 * 1000));
-  const numeroSemana = Math.ceil((dias + primerDiaDelAño.getDay() + 1) / 7);
-  return `${fecha.getFullYear()}-S${numeroSemana.toString().padStart(2, '0')}`;
+  const d = new Date(Date.UTC(fecha.getFullYear(), fecha.getMonth(), fecha.getDate()));
+  const dia = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dia);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const semanaNum = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  return `${d.getUTCFullYear()}-${semanaNum.toString().padStart(2, '0')}`;
 }
-
 
 function fechasSemana(year, week) {
   const simple = new Date(year, 0, 1 + (week - 1) * 7);
@@ -181,30 +120,25 @@ function obtenerDatosSemana(claveSemana) {
 let semanaSeleccionadaIndex = 0;
 
 function calcularClaveSemanaConOffset(offset) {
-  const hoy = new Date();
-  hoy.setDate(hoy.getDate() + offset * 7);
-  return obtenerClaveSemana(hoy);
+  const fecha = new Date();
+  fecha.setDate(fecha.getDate() + offset * 7);
+  return obtenerClaveSemana(fecha);
 }
 
-function actualizarVistaPorSemana() {
-  const claveSemana = calcularClaveSemanaConOffset(semanaSeleccionadaIndex);
-  const datosSemana = datosGlobales.filter(d => obtenerClaveSemana(d.fecha) === claveSemana);
+function mostrarTituloSemana(claveSemana) {
+  const titulo = document.getElementById('titulo-semana');
+  const [yearStr, semanaStr] = claveSemana.split('-');
+  const year = Number(yearStr);
+  const semana = Number(semanaStr);
+  const { inicio, fin } = fechasSemana(year, semana);
+  const rango = `Del ${formatearFecha(inicio)} al ${formatearFecha(fin)}`;
 
-  mostrarTituloSemana(claveSemana);
-  mostrarDatos(datosSemana);
-  mostrarEstadisticas(datosSemana);
+  titulo.textContent = semanaSeleccionadaIndex === 0
+    ? `Semana Actual (${rango})`
+    : `Semana ${semana} del ${year} (${rango})`;
+
+  document.getElementById('btn-semana-siguiente').disabled = (semanaSeleccionadaIndex >= 0);
 }
-
-document.getElementById('btn-semana-anterior').addEventListener('click', () => {
-  semanaSeleccionadaIndex--;
-  actualizarVistaPorSemana();
-});
-
-document.getElementById('btn-semana-siguiente').addEventListener('click', () => {
-  semanaSeleccionadaIndex++;
-  actualizarVistaPorSemana();
-});
-obtenerClaveSemana
 
 function unidadLabel(codigo) {
   const map = {
@@ -540,6 +474,24 @@ function eliminarProductosDe(categoria) {
   productosInsertados[categoria] = false;
 }
 
+snapshot.forEach(doc => {
+  const data = doc.data();
+
+  if (!data.fecha || !data.producto || !data.precio) {
+    console.warn("Documento ignorado por campos incompletos:", data);
+    return;
+  }
+
+  const fechaConvertida = new Date(data.fecha);
+
+  datos.push({
+    producto: data.producto,
+    precio: parseFloat(data.precio),
+    equivalencia: data.equivalencia || '',
+    ciudad: data.ciudad || '',
+    fecha: fechaConvertida
+  });
+});
 
 
 
