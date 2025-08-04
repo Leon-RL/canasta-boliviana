@@ -33,22 +33,24 @@
       <p style="font-family: calibri;font-size: 18px;color:rgba(0, 0, 0, 0.527);">aqui puedes ver información sobre los precios de cualquier producto,
         asi tambien puedes ayudar registrando a que otros usuarios vean.
       </p>
-    <label for="producto">Selecciona categoría o producto</label>
-  <select id="Producto" size="10" style="width:300px;height: 100px;">
-  
-  
-  <option class="group-title" value="Verduras">🥬 Verduras</option>
-  <option class="group-title" value="Proteínas">🥩 Proteínas</option>
-  <option class="group-title" value="Granos">🌾 Granos</option>
-  <option class="group-title" value="Preparaciones">🍞 Preparaciones</option>
-  <option class="group-title" value="Frutas">🍇 Frutas</option>
-  <option class="group-title" value="Lácteos">🥛 Lácteos</option>
+    <label for="select-productos">Selecciona Categoría</label>
+<select id="Categoria" required>
+  <option disabled selected>-- Elegir --</option>
 
-  <option class="group-title" value="BasicosCocina">🍳 BasicosCocina</option>
-  <option class="group-title" value="Bebidas">🫗 Bebidas</option>
-  <option class="group-title" value="Aseopersonal">🪥 Aseo personal</option>
+  <option value="Verduras">🥬 Verduras</option>
+  <option value="Proteínas">🥩 Proteínas</option>
+  <option value="Granos">🌾 Granos</option>
+  <option value="Preparaciones">🍞 Preparaciones</option>
+  <option value="Frutas">🍇 Frutas</option>
+    <option value="Lácteos">🥛 Lácteos</option>
+  <option value="BasicosCocina">🍳 BasicosCocina</option>
+  <option value="Bebidas">🫗 Bebidas</option>
+  <option value="Aseopersonal">🪥 Aseo personal</option>
 </select>
-
+<label for="select-producto">Selecciona Producto</label>
+<select id="select-producto" required>
+  <option disabled selected>-- Selecciona un producto --</option>
+</select>
       <div class="form-group">
         <label>Precio (Bs)</label>
         <input type="number" id="precio" placeholder="Ej. 8.50" />
