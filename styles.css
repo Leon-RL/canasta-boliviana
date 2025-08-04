@@ -1,0 +1,283 @@
+
+body {
+  font-family: 'Poopins', sans-serif;
+  margin: 0;
+  background:#f0f0f0;
+  padding: 0;
+  height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  
+}
+.topbar {
+  position: fixed;
+  width: 100%;
+  background: #3e4449;
+  color: #fff;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  z-index: 1000;
+  box-shadow: 2px 3px 3px #00000094;
+}
+.menu-toggle {
+  font-size: 24px;
+  margin-right: 20px;
+  cursor: pointer;
+}
+.topbar-title {
+  flex-grow: 1;
+  text-align: center;
+  margin: 0;
+}
+
+.sidebar {
+  display: block;
+  width: 200px;
+  background: #1e2c35;
+  color: #ecf0f1;
+  padding: 20px;
+  height: 100vh;
+  position: fixed;
+  top: 50px;
+  left: 0;
+  transition: transform 0.3s ease;
+  z-index: 999;
+  transform: translateX(0);
+  box-shadow: 4px 2px 13px #000000ec
+}
+/*.overlay-siderbar {
+  position: fixed;
+  top: 50px; /* deja visible la barra superior 
+  left: 0;
+  width: 100%;
+  height: calc(100vh - 50px);
+  background: rgba(0, 0, 0, 0); /* oscurece un poco 
+  backdrop-filter: blur(0px); /* desenfoque del fondo 
+  z-index: 998;
+  display: none;
+  transition: opacity 0.3s ease;
+}*/
+.overlay-siderbar.active{
+  display: block;
+}
+.sidebar.hidden {
+  transform: translateX(-100%);
+}
+.sidebar h2 {
+  margin: 0 0 20px;
+}
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+.sidebar li {
+  padding: 10px 0;
+  cursor: pointer;
+}
+.content {
+  margin-top: auto; /* elimina margen arriba */
+  padding: auto;
+  max-width: auto;
+  margin-left: -10px; /*auto*/
+  margin-right: -10px; /*auto*/
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.card:text(){
+  width: -40px;
+}
+.card {
+  margin: 0 auto;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.37);
+  background: #f3f3f3;
+  width: 80%; /*acomoda el tamaño */
+  max-width: auto; /*auto completo se adapta a pantalla*/
+}
+
+.form-group {
+  margin-bottom: 15px;
+  width: auto;/*campo de escribir*/
+  
+}
+input, select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+button {
+  background: #355163;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 2px 4px 4px #00000088;
+  text-shadow: 1px 2px 2px rgba(0, 0, 0, 0.5);
+
+}
+btn-reportar{
+  background-color: #27ae60;
+  box-shadow: 2px 2px 2px #27ae60;
+}
+button:hover {
+  background: #406277e3;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+th {
+  background: #355163;
+  color: white;
+}
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #27ae60;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+.hidden {
+  display: none;
+}
+.botones-principales button {
+  margin: 10px;
+}
+.registro{
+  box-shadow: 2px 2px 2px #27ae60;
+}
+h3{
+  font-size: 30px;
+  text-align: center;
+  background-color: #f5f3f3;
+  text-shadow:2px 2px 2px #00000052;
+}
+
+
+#modal-fondo {
+  display: none; /* Oculto por defecto */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.6); /* Fondo oscuro */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+#modal-contenido {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+#btn-mostrar-qr {
+      background-color: #27ae60;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 18px;
+      margin: 40px auto;
+      display: block;
+      width: 200px;
+    }
+
+    /* Fondo modal borroso */
+    #modal-fondo {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: none; /* oculto por defecto */
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    /* Contenido del modal (imagen QR) */
+    #modal-contenido {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      max-width: 320px;
+      text-align: center;
+      position: relative;
+    }
+
+    #modal-contenido img {
+      width: 280px;
+      height: 280px;
+      user-select: none;
+    }
+
+    /* Botón cerrar */
+    #cerrar-modal {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #e74c3c;
+      border: none;
+      color: white;
+      font-weight: bold;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 30px;
+    }
+
+li {
+      background-color: #1e2c35;
+      color: white;
+      padding: 12px 20px;
+      margin: 10px 0;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: sans-serif;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0);
+    }
+    li:hover{
+      width: auto;
+      background-color: #2a3e4b;
+    }
+    li:active{
+      background-color: #ccc;
+    }
+    
+  
+    select.Producto{
+      font-size: 16px;
+      padding: 8px;
+      margin: 20px;
+      width: 260px;
+      height: 120px;
+    }
+
+
+
+
+    
