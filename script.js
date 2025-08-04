@@ -13,9 +13,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 
+
+
 // Función para cargar unidades según producto
 export function CargarUnidades() {
-  const producto = document.getElementById('Producto').value;
+  const producto = document.getElementById('select-producto').value;
   const equivalenciaSelect = document.getElementById('equivalencia');
   equivalenciaSelect.innerHTML = '';
 
@@ -248,7 +250,7 @@ function mostrarDatosSemana() {
 }
 
 function limpiarFormulario() {
-  document.getElementById('Producto').selectedIndex = 0;
+  document.getElementById('Categoria').selectedIndex = 0;
   document.getElementById('precio').value = '';
   document.getElementById('equivalencia').innerHTML = '<option disabled selected>Selecciona la Unidad</option>';
   document.getElementById('ciudad').selectedIndex = 0;
@@ -263,13 +265,14 @@ function mostrarToast(msg, color) {
 }
 
 document.getElementById('btn-reportar').addEventListener('click', () => {
-  const producto = document.getElementById('Producto').value.trim();
+  const producto = document.getElementById('select-producto').value.trim();
   const precioStr = document.getElementById('precio').value.trim();
   const equivalencia = document.getElementById('equivalencia').value.trim();
   const ciudad = document.getElementById('ciudad').value.trim();
 
   // Validaciones:
-  if (!producto || categorias.hasOwnProperty(producto) ) {
+if (!producto || Object.keys(productosPorCategoria).includes(producto)) {
+
     // No debe ser vacío ni categoría (solo productos válidos)
     mostrarToast('⚠️ Por favor, selecciona un producto válido.', '#e74c3c');
     return;
@@ -308,7 +311,7 @@ document.getElementById('btn-semana-siguiente').addEventListener('click', () => 
   }
 });
 
-document.getElementById('Producto').addEventListener('change', CargarUnidades);
+document.getElementById('select-producto').addEventListener('change', CargarUnidades);
 window.addEventListener('load', () => {
   mostrarDatosSemana();
   CargarUnidades();
@@ -370,29 +373,97 @@ document.addEventListener('click', function (event) {
         document.body.style.overflow = "auto";
       }
     });*/
+  // Eventos
+  const selectCat = document.getElementById("Categoria");
+  if (selectCat) {
+    selectCat.addEventListener("change", (e) => {
+      cargarProductos(e.target.value);
+    });
+  }
 
-    
-    
-    const categorias = {
-  
-  Verduras: ["Papa","Camote","Yuca","Chuño","Plátano macho","Calabaza", "Aceituna",
-    "Cebolla", "Zanahoria", "Tomate","Remolacha","Brócoli","Espárragos",
-    "Coliflor","Apio","Pepino","Berenjena","Lechugas","Acelga","Espinaca","Frijoles"],
-  Proteínas:["Carne de pollo","Carne de res","Huevo","Pescados","Atún","Maríscos","Langostas",
-    "Carne de magra","Lomo","Pavo","","Frijoles","Lentejas","Frutos secos",""],
-  Granos:["Arroz integral","Trigo","Avena","Polenta","Palomitas de maíz","Quinoa"],
-  Preparaciones:["Pan integral","Pan de maíz","Pan blanco","Fideo","Galleta integral","Pasta integral",
-    "Pastel","Sémola de maíz","Panqueque","Pizza","Tortilla","Wafle"],
-  Frutas:["Manzana","Plátano","Arandanos","Melón","Cerezas","Cóctel de frutas","Toronja",
-    "Uvas","Limón","Lima","Nectarinas","Naranja","Fresas","Durazno","Pera","Piña","Ciruela",
-    "Frambuesas","Mandarinas","Sandía","Chabacano"],
-  Lácteos: ["Leche en polvo", "Leche evaporada","Yogur","Queso","Helado","Soya","Coco","Almendra","Mantequillas"],
-  BasicosCocina:["Azúcar","Sal","Aceite","Harina","Vinagre","Salsa soya","Mayonesa"],
-  Bebidas:["Aguas","Jugo","Refresco","Café","Té"],
-  Aseopersonal:["Papel higénico","Pasta dental","Colino Colgate","Jaboncillo","Jabon","Cepillo Dental","Cepillo de ropa",
-    "Escoba","Ace","Shampoo","Cremas"]
-};
+  const selectProd = document.getElementById("select-producto");
+  if (selectProd) {
+    selectProd.addEventListener("change", (e) => {
+      cargarUnidades(e.target.value);
+    });
+  }
+    // Cargar productos
+  const cargarProductos = (categoria) => {
+    const selectProducto = document.getElementById("select-producto");
+    if (!selectProducto) return;
 
+    selectProducto.innerHTML = "<option disabled selected>-- Selecciona un producto --</option>";
+    (productosPorCategoria[categoria] || []).forEach(p => {
+      const opt = document.createElement("option");
+      opt.value = p;
+      opt.textContent = p;
+      selectProducto.appendChild(opt);
+    });
+
+    // Limpiar unidades
+    const unidadSelect = document.getElementById("equivalencia");
+    if (unidadSelect) unidadSelect.innerHTML = "<option disabled selected>Selecciona unidad</option>";
+  };
+     // Productos por categoría
+  const productosPorCategoria = {
+    Verduras: [
+      "Papa", "Camote", "Yuca", "Chuño", "Plátano macho", "Calabaza", "Aceituna",
+      "Cebolla", "Zanahoria", "Tomate", "Remolacha", "Brócoli", "Espárragos",
+      "Coliflor", "Apio", "Pepino", "Berenjena", "Lechugas", "Acelga", "Espinaca", "Frijoles"
+    ],
+    Proteínas: [
+      "Carne de pollo", "Carne de res", "Huevo", "Pescados", "Atún", "Maríscos", "Langostas",
+      "Carne de magra", "Lomo", "Pavo", "Frijoles", "Lentejas", "Frutos secos"
+    ],
+    Granos: [
+      "Arroz integral", "Trigo", "Avena", "Polenta", "Palomitas de maíz", "Quinoa"
+    ],
+    Preparaciones: [
+      "Pan integral", "Pan de maíz", "Pan blanco", "Fideo", "Galleta integral", "Pasta integral",
+      "Pastel", "Sémola de maíz", "Panqueque", "Pizza", "Tortilla", "Wafle"
+    ],
+    Frutas: [
+      "Manzana", "Plátano", "Arandanos", "Melón", "Cerezas", "Cóctel de frutas", "Toronja",
+      "Uvas", "Limón", "Lima", "Nectarinas", "Naranja", "Fresas", "Durazno", "Pera",
+      "Piña", "Ciruela", "Frambuesas", "Mandarinas", "Sandía", "Chabacano"
+    ],
+    Lácteos: [
+      "Leche en polvo", "Leche evaporada", "Yogur", "Queso", "Helado",
+      "Soya", "Coco", "Almendra", "Mantequillas"
+    ],
+    BasicosCocina: [
+      "Azúcar", "Sal", "Aceite", "Harina", "Vinagre", "Salsa soya", "Mayonesa"
+    ],
+    Bebidas: [
+      "Aguas", "Jugo", "Refresco", "Café", "Té"
+    ],
+    Aseopersonal: [
+      "Papel higénico", "Pasta dental", "Colino Colgate", "Jaboncillo", "Jabon",
+      "Cepillo Dental", "Cepillo de ropa", "Escoba", "Ace", "Shampoo", "Cremas"
+    ]
+  };
+  const selectProducto = document.getElementById("select-producto");
+
+selectProducto.addEventListener("change", function () {
+  const valor = this.value;
+
+  // Si es una categoría, cargar productos
+  if (valor.startsWith("categoria-")) {
+    const categoria = valor.split("categoria-")[1];
+    const productos = productosPorCategoria[categoria];
+
+    // Limpiar select
+    selectProducto.innerHTML = `<option value="">Seleccione un producto</option>`;
+
+    // Agregar productos
+    productos.forEach(producto => {
+      const option = document.createElement("option");
+      option.value = producto;
+      option.textContent = producto;
+      selectProducto.appendChild(option);
+    });
+  }
+});
 const productosInsertados = {
   
   Verduras: false,
@@ -406,7 +477,7 @@ const productosInsertados = {
   Aseopersonal:false
 };
 
-const select = document.getElementById('Producto');
+
 let ultimaCategoriaClick = null;
 
 // Cambia el evento a mousedown para capturar clic antes de que select cambie
