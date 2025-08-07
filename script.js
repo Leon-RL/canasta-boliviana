@@ -360,13 +360,25 @@ window.addEventListener('load', () => {
   
 
   // Cargar categorías
-  selectCategoria.innerHTML = '<option disabled selected>-- Selecciona una categoría --</option>';
-  Object.keys(productosPorCategoria).forEach(cat => {
-    const option = document.createElement("option");
-    option.value = cat;
-    option.textContent = cat;
-    selectCategoria.appendChild(option);
-  });
+  const categoriasConEmojis = {
+  Verduras: "🥦 Verduras",
+  Proteínas: "🍗 Proteínas",
+  Granos: "🌾 Granos",
+  Preparaciones: "🍞 Preparaciones",
+  Frutas: "🍎 Frutas",
+  Lácteos: "🧀 Lácteos",
+  BasicosCocina: "🧂 Básicos de Cocina",
+  Bebidas: "🥤 Bebidas",
+  Aseopersonal: "🧼 Aseo Personal"
+};
+
+selectCategoria.innerHTML = '<option disabled selected>-- Selecciona una categoría --</option>';
+Object.keys(productosPorCategoria).forEach(cat => {
+  const option = document.createElement("option");
+  option.value = cat;
+  option.textContent = categoriasConEmojis[cat] || cat;
+  selectCategoria.appendChild(option);
+});
 
   // Cuando cambia categoría → cargar productos
   // Cuando cambia categoría → cargar productos
@@ -519,6 +531,7 @@ document.addEventListener('click', function (event) {
     ]
   };
   
+
 
 
 
