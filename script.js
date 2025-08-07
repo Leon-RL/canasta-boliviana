@@ -1,5 +1,8 @@
 // Firebase config (si usas Firebase, coloca aquí la config real)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+import { 
+  getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCbE78-0DMWVEuf7rae3uyI-FqhDTPL3J8",
@@ -11,12 +14,35 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const selectProducto = document.getElementById("select-producto");
+const selectCategoria = document.getElementById("Categoria");
+document.getElementById('select-producto').innerHTML = '<option disabled selected>-- Selecciona un producto --</option>';
+
+
+async function guardarRegistroSemanal(registro) {
+  const claveSemana = obtenerClaveSemana(new Date());
+  try {
+    await addDoc(collection(db, "precios"), {
+      ...registro,
+      semana: claveSemana,
+      fecha: serverTimestamp() // 🔹 Fecha exacta desde el servidor
+    });
+    console.log("✅ Registro guardado en Firestore");
+    return true;
+  } catch (error) {
+    console.error("❌ Error al guardar en Firestore:", error);
+    return false;
+  }
+}
+
 
 
 
 
 // Función para cargar unidades según producto
-export function CargarUnidades() {
+function CargarUnidades() {
   const producto = document.getElementById('select-producto').value;
   const equivalenciaSelect = document.getElementById('equivalencia');
   equivalenciaSelect.innerHTML = '';
@@ -106,18 +132,23 @@ function formatearFecha(fecha) {
   return fecha.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
-function guardarRegistroSemanal(registro) {
-  const historial = JSON.parse(localStorage.getItem('historialSemanal')) || {};
-  const claveSemana = obtenerClaveSemana(new Date());
-  if (!historial[claveSemana]) historial[claveSemana] = [];
-  historial[claveSemana].push(registro);
-  localStorage.setItem('historialSemanal', JSON.stringify(historial));
+
+
+async function obtenerDatosSemana(claveSemana) {
+  try {
+    const q = query(collection(db, "precios"), where("semana", "==", claveSemana));
+    const querySnapshot = await getDocs(q);
+    const datos = [];
+    querySnapshot.forEach(doc => {
+      datos.push(doc.data());
+    });
+    return datos;
+  } catch (error) {
+    console.error("Error al obtener datos de Firestore:", error);
+    return [];
+  }
 }
 
-function obtenerDatosSemana(claveSemana) {
-  const historial = JSON.parse(localStorage.getItem('historialSemanal')) || {};
-  return historial[claveSemana] || [];
-}
 
 let semanaSeleccionadaIndex = 0;
 
@@ -139,7 +170,8 @@ function mostrarTituloSemana(claveSemana) {
     ? `Semana Actual (${rango})`
     : `Semana ${semana} del ${year} (${rango})`;
 
-  document.getElementById('btn-semana-siguiente').disabled = (semanaSeleccionadaIndex >= 0);
+  document.getElementById('btn-semana-siguiente').disabled = (semanaSeleccionadaIndex === 0);
+
 }
 
 function unidadLabel(codigo) {
@@ -184,25 +216,36 @@ function mostrarEstadisticas(datos) {
   }
 
   Object.keys(agrupados).forEach(producto => {
-    tbodyEstadisticas.innerHTML += `<tr style="cursor:pointer;" onclick="mostrarDetalle('${producto}')">
-      <td style="color:blue;">${producto}</td></tr>`;
+    // 🔹 Mostrar solo si hay mínimo 2 registros
+    if (agrupados[producto].length >= 1) {
+      tbodyEstadisticas.innerHTML += `<tr style="cursor:pointer;" onclick="mostrarDetalle('${producto}')">
+        <td style="color:blue;">${producto}</td></tr>`;
+    }
   });
+
+  if (tbodyEstadisticas.innerHTML.trim() === '') {
+    tbodyEstadisticas.innerHTML = '<tr><td>No hay productos con suficientes registros.</td></tr>';
+  }
 }
 
-window.mostrarDetalle = function(producto) {
+
+window.mostrarDetalle = async function(producto) {
   const claveSemana = semanaSeleccionadaIndex === 0
     ? obtenerClaveSemana(new Date())
     : calcularClaveSemanaConOffset(semanaSeleccionadaIndex);
-  const datos = obtenerDatosSemana(claveSemana);
-  const registrosProducto = datos.filter(d => d.producto === producto);
-  const detalleDiv = document.getElementById('detalle-estadisticas');
-  const detalleContenido = document.getElementById('detalle-contenido');
 
-  if (!registrosProducto.length) {
-    detalleContenido.innerHTML = "Sin registros.";
-    detalleDiv.classList.remove('hidden');
+  const datos = await obtenerDatosSemana(claveSemana);
+  const registrosProducto = datos.filter(d => d.producto === producto);
+
+  // 🔹 Evitar mostrar si hay menos de 2 registros
+  if (registrosProducto.length < 2) {
+    document.getElementById('detalle-contenido').innerHTML = "No hay suficientes registros para estadísticas.";
+    document.getElementById('detalle-estadisticas').classList.remove('hidden');
     return;
   }
+
+  const detalleDiv = document.getElementById('detalle-estadisticas');
+  const detalleContenido = document.getElementById('detalle-contenido');
 
   let detalleHTML = `<strong>${producto}</strong><br><br>`;
   const agrupados = {};
@@ -212,26 +255,24 @@ window.mostrarDetalle = function(producto) {
   });
 
   for (const unidad in agrupados) {
-  const registros = agrupados[unidad];
-  const precios = registros.map(r => r.precio);
-  const max = Math.max(...precios);
-  const min = Math.min(...precios);
+    const registros = agrupados[unidad];
+    const precios = registros.map(r => r.precio);
+    const max = Math.max(...precios);
+    const min = Math.min(...precios);
 
-  const ciudadesMax = registros.filter(r => r.precio === max).map(r => r.ciudad).join(', ');
-  const ciudadesMin = registros.filter(r => r.precio === min).map(r => r.ciudad).join(', ');
+    const ciudadesMax = registros.filter(r => r.precio === max).map(r => r.ciudad).join(', ');
+    const ciudadesMin = registros.filter(r => r.precio === min).map(r => r.ciudad).join(', ');
 
-  let titulo = '';
+    let titulo = '';
+    if (unidad === 'unidad') titulo = 'Unidad';
+    else if (unidad === 'paquete') titulo = 'Paquete';
+    else if (unidad === 'maple') titulo = 'Maple';
+    else titulo = unidadLabel(unidad);
 
-  if (unidad === 'unidad') titulo = 'Unidad';
-  else if (unidad === 'paquete') titulo = 'Paquete';
-  else if (unidad === 'maple') titulo = 'Maple';
-  else titulo = unidadLabel(unidad);
-
-  detalleHTML += `<strong>${titulo}:</strong> ${unidadLabel(unidad)}<br>
-    Máximo: ${max.toFixed(2)} Bs (${ciudadesMax})<br>
-    Mínimo: ${min.toFixed(2)} Bs (${ciudadesMin})<br><br>`;
-}
-
+    detalleHTML += `<strong>${titulo}:</strong> ${unidadLabel(unidad)}<br>
+      Máximo: ${max.toFixed(2)} Bs (${ciudadesMax})<br>
+      Mínimo: ${min.toFixed(2)} Bs (${ciudadesMin})<br><br>`;
+  }
 
   const promedio = registrosProducto.reduce((sum, r) => sum + r.precio, 0) / registrosProducto.length;
   detalleHTML += `<strong>Promedio:</strong> ${promedio.toFixed(2)} Bs<br>`;
@@ -239,15 +280,18 @@ window.mostrarDetalle = function(producto) {
   detalleDiv.classList.remove('hidden');
 };
 
-function mostrarDatosSemana() {
+
+async function mostrarDatosSemana() {
   const clave = semanaSeleccionadaIndex === 0
     ? obtenerClaveSemana(new Date())
     : calcularClaveSemanaConOffset(semanaSeleccionadaIndex);
-  const datosSemana = obtenerDatosSemana(clave);
+
+  const datosSemana = await obtenerDatosSemana(clave);
   mostrarDatos(datosSemana);
   mostrarEstadisticas(datosSemana);
   mostrarTituloSemana(clave);
 }
+
 
 function limpiarFormulario() {
   document.getElementById('Categoria').selectedIndex = 0;
@@ -264,39 +308,38 @@ function mostrarToast(msg, color) {
   setTimeout(() => toast.classList.add('hidden'), 3000);
 }
 
-document.getElementById('btn-reportar').addEventListener('click', () => {
-  const producto = document.getElementById('select-producto').value.trim();
+document.getElementById('btn-reportar').addEventListener('click', async () => {
+  const producto = document.getElementById('select-producto').value?.trim() || "";
   const precioStr = document.getElementById('precio').value.trim();
-  const equivalencia = document.getElementById('equivalencia').value.trim();
+  const equivalencia = document.getElementById('equivalencia').value || "";
   const ciudad = document.getElementById('ciudad').value.trim();
 
-  // Validaciones:
-if (!producto || Object.keys(productosPorCategoria).includes(producto)) {
+  // Validaciones antes de intentar guardar
+  if (!producto) return mostrarToast('⚠️ Selecciona un producto.', '#e74c3c');
+  if (!precioStr || isNaN(precioStr) || Number(precioStr) <= 0) return mostrarToast('⚠️ Ingresa un precio válido.', '#e74c3c');
+  if (!equivalencia || equivalencia === 'Selecciona la Unidad') return mostrarToast('⚠️ Selecciona una unidad.', '#e74c3c');
+  if (!ciudad || ciudad === 'Selecciona Ciudad') return mostrarToast('⚠️ Selecciona una ciudad.', '#e74c3c');
 
-    // No debe ser vacío ni categoría (solo productos válidos)
-    mostrarToast('⚠️ Por favor, selecciona un producto válido.', '#e74c3c');
-    return;
-  }
-  if (!precioStr || isNaN(precioStr) || Number(precioStr) <= 0) {
-    mostrarToast('⚠️ Ingresa un precio válido mayor que cero.', '#e74c3c');
-    return;
-  }
-  if (!equivalencia || equivalencia === 'Selecciona la Unidad') {
-    mostrarToast('⚠️ Selecciona una unidad válida.', '#e74c3c');
-    return;
-  }
-  if (!ciudad || ciudad === 'Selecciona Ciudad') {
-    mostrarToast('⚠️ Selecciona una ciudad válida.', '#e74c3c');
-    return;
-  }
+  // Si pasa las validaciones → intentar guardar
+  const exito = await guardarRegistroSemanal({ 
+    producto, 
+    precio: Number(precioStr), 
+    equivalencia, 
+    ciudad
+  });
 
-  // Si pasa todas las validaciones
-  const precio = Number(precioStr);
-  guardarRegistroSemanal({ producto, precio, equivalencia, ciudad, fecha: new Date().toISOString() });
-  limpiarFormulario();
-  mostrarToast('✅ Precio guardado con éxito.', '#27ae60');
-  mostrarDatosSemana();
+  if (exito) {
+    limpiarFormulario();
+    mostrarToast('✅ Precio guardado con éxito.', '#27ae60');
+    await mostrarDatosSemana(); 
+  } else {
+    // Este error solo sale si realmente Firestore falló
+    mostrarToast('❌ No se pudo guardar. Revisa la conexión o permisos.', '#e74c3c');
+  }
 });
+
+
+
 
 
 document.getElementById('btn-semana-anterior').addEventListener('click', () => {
@@ -313,18 +356,51 @@ document.getElementById('btn-semana-siguiente').addEventListener('click', () => 
 
 document.getElementById('select-producto').addEventListener('change', CargarUnidades);
 window.addEventListener('load', () => {
-  mostrarDatosSemana();
-  CargarUnidades();
+  const selectCategoria = document.getElementById("Categoria");
+  
+
+  // Cargar categorías
+  selectCategoria.innerHTML = '<option disabled selected>-- Selecciona una categoría --</option>';
+  Object.keys(productosPorCategoria).forEach(cat => {
+    const option = document.createElement("option");
+    option.value = cat;
+    option.textContent = cat;
+    selectCategoria.appendChild(option);
+  });
+
+  // Cuando cambia categoría → cargar productos
+  // Cuando cambia categoría → cargar productos
+selectCategoria.addEventListener("change", (e) => {
+  const categoria = e.target.value;
+  const productos = productosPorCategoria[categoria] || [];
+
+  selectProducto.innerHTML = '<option disabled selected>-- Selecciona un producto --</option>';
+  
+  productos.forEach(prod => {
+    const opt = document.createElement("option");
+    opt.value = prod;
+    opt.textContent = prod;
+    selectProducto.appendChild(opt);
+  });
 });
+
+selectProducto.addEventListener("change", CargarUnidades);
+
+
+  mostrarDatosSemana();
+});
+
+
 
 // Menú lateral
 // Menú lateral
+const overlay = document.getElementById('overlay');
 const sidebar = document.getElementById('sidebar');
 const menuToggle = document.getElementById('menu-toggle');
 
 menuToggle.addEventListener('click', () => {
   sidebar.classList.toggle('hidden');
-  overlay.classList.toggle('active');
+
 });
 overlay.addEventListener('click', () => {
   sidebar.classList.add('hidden');
@@ -384,12 +460,12 @@ document.addEventListener('click', function (event) {
   const selectProd = document.getElementById("select-producto");
   if (selectProd) {
     selectProd.addEventListener("change", (e) => {
-      cargarUnidades(e.target.value);
+      CargarUnidades();
     });
   }
     // Cargar productos
   const cargarProductos = (categoria) => {
-    const selectProducto = document.getElementById("select-producto");
+    
     if (!selectProducto) return;
 
     selectProducto.innerHTML = "<option disabled selected>-- Selecciona un producto --</option>";
@@ -442,109 +518,6 @@ document.addEventListener('click', function (event) {
       "Cepillo Dental", "Cepillo de ropa", "Escoba", "Ace", "Shampoo", "Cremas"
     ]
   };
-  const selectProducto = document.getElementById("select-producto");
-
-selectProducto.addEventListener("change", function () {
-  const valor = this.value;
-
-  // Si es una categoría, cargar productos
-  if (valor.startsWith("categoria-")) {
-    const categoria = valor.split("categoria-")[1];
-    const productos = productosPorCategoria[categoria];
-
-    // Limpiar select
-    selectProducto.innerHTML = `<option value="">Seleccione un producto</option>`;
-
-    // Agregar productos
-    productos.forEach(producto => {
-      const option = document.createElement("option");
-      option.value = producto;
-      option.textContent = producto;
-      selectProducto.appendChild(option);
-    });
-  }
-});
-const productosInsertados = {
   
-  Verduras: false,
-  Proteínas: false,
-  Granos:false,
-  Preparaciones:false,
-  Frutas:false,
-  Lácteos: false,
-  BasicosCocina: false,
-  Bebidas:false,
-  Aseopersonal:false
-};
-
-
-let ultimaCategoriaClick = null;
-
-// Cambia el evento a mousedown para capturar clic antes de que select cambie
-select.addEventListener('mousedown', function(e) {
-  e.preventDefault();
-  const opciones = Array.from(select.options);
-
-  // Obtener la opción sobre la que se hizo clic
-  const clickedOption = opciones.find(opt => {
-    const rect = opt.getBoundingClientRect();
-    return e.clientY >= rect.top && e.clientY <= rect.bottom;
-  });
-
-  if (!clickedOption || !clickedOption.value) return;
-
-  const valor = clickedOption.value;
-
-  if (categorias[valor]) {
-    // Es una categoría
-    if (valor === ultimaCategoriaClick) {
-      eliminarProductosDe(valor);
-      ultimaCategoriaClick = null;
-      select.value = ""; // Reinicia visual
-    } else {
-      if (ultimaCategoriaClick) eliminarProductosDe(ultimaCategoriaClick);
-      insertarProductosDebajo(valor);
-      ultimaCategoriaClick = valor;
-      select.value = valor;
-    }
-  } else {
-    // Es un producto
-    select.value = valor; // ✅ queda seleccionado visualmente
-    select.innerHTML = `<option selected value="${valor}">${valor}</option>`;
-
-    ultimaCategoriaClick = null;
-    if (typeof CargarUnidades === "function") CargarUnidades(); // ✅ carga unidades
-  }
-});
-
-function insertarProductosDebajo(categoria) {
-  if (productosInsertados[categoria]) return;
-
-  const opciones = Array.from(select.options);
-  const indice = opciones.findIndex(opt => opt.value === categoria);
-
-  categorias[categoria].forEach((producto, i) => {
-    const option = document.createElement('option');
-    option.value = producto;
-    option.textContent = " " + producto;
-    option.classList.add('producto');
-    select.add(option, indice + 1 + i);
-  });
-
-  productosInsertados[categoria] = true;
-}
-
-function eliminarProductosDe(categoria) {
-  const opciones = Array.from(select.options);
-  for (let i = opciones.length - 1; i >= 0; i--) {
-    const opt = opciones[i];
-    if (opt.classList.contains('producto') && categorias[categoria].includes(opt.value)) {
-      select.remove(i);
-    }
-  }
-  productosInsertados[categoria] = false;
-}
-
-
 
 
