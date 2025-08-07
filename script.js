@@ -238,7 +238,7 @@ window.mostrarDetalle = async function(producto) {
   const registrosProducto = datos.filter(d => d.producto === producto);
 
   // 🔹 Evitar mostrar si hay menos de 2 registros
-  if (registrosProducto.length < 2) {
+  if (registrosProducto.length < 1) {
     document.getElementById('detalle-contenido').innerHTML = "No hay suficientes registros para estadísticas.";
     document.getElementById('detalle-estadisticas').classList.remove('hidden');
     return;
@@ -519,5 +519,6 @@ document.addEventListener('click', function (event) {
     ]
   };
   
+
 
 
