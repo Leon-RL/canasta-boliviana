@@ -315,10 +315,23 @@ document.getElementById('btn-reportar').addEventListener('click', async () => {
   const ciudad = document.getElementById('ciudad').value.trim();
 
   // Validaciones antes de intentar guardar
-  if (!producto) return mostrarToast('⚠️ Selecciona un producto.', '#e74c3c');
-  if (!precioStr || isNaN(precioStr) || Number(precioStr) <= 0) return mostrarToast('⚠️ Ingresa un precio válido.', '#e74c3c');
-  if (!equivalencia || equivalencia === 'Selecciona la Unidad') return mostrarToast('⚠️ Selecciona una unidad.', '#e74c3c');
-  if (!ciudad || ciudad === 'Selecciona Ciudad') return mostrarToast('⚠️ Selecciona una ciudad.', '#e74c3c');
+  if (!producto || producto==='-- Selecciona un producto --') {
+    mostrarToast('⚠️ Selecciona un producto.', '#e74c3c');
+    return;
+  }
+  if (!precioStr || isNaN(precioStr) || Number(precioStr) <= 0) {
+    mostrarToast('⚠️ Ingresa un precio válido.', '#e74c3c');
+    return;
+  }
+  console.log('equivalencia:', equivalencia);
+  if (!equivalencia || equivalencia === 'Selecciona la Unidad' ) {
+    mostrarToast('⚠️ Selecciona una unidad.', '#e74c3c');
+    return;
+  }
+  if (!ciudad || ciudad ==='' || ciudad === 'Selecciona Ciudad') {
+    mostrarToast('⚠️ Selecciona una Ciudad.', '#e74c3c');
+    return;
+  }
 
   // Si pasa las validaciones → intentar guardar
   const exito = await guardarRegistroSemanal({ 
@@ -333,7 +346,6 @@ document.getElementById('btn-reportar').addEventListener('click', async () => {
     mostrarToast('✅ Precio guardado con éxito.', '#27ae60');
     await mostrarDatosSemana(); 
   } else {
-    // Este error solo sale si realmente Firestore falló
     mostrarToast('❌ No se pudo guardar. Revisa la conexión o permisos.', '#e74c3c');
   }
 });
@@ -531,6 +543,7 @@ document.addEventListener('click', function (event) {
     ]
   };
   
+
 
 
 
